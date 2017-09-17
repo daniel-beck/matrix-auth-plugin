@@ -28,15 +28,19 @@ import hudson.security.Permission;
 import hudson.security.SecurityRealm;
 import jenkins.model.IdStrategy;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public interface AuthorizationContainer {
 
@@ -65,10 +69,50 @@ public interface AuthorizationContainer {
     @Restricted(NoExternalUse.class)
     default void add(String shortForm) {
         int idx = shortForm.indexOf(':');
-        Permission p = Permission.fromId(shortForm.substring(0, idx));
-        if (p==null)
-            throw new IllegalArgumentException("Failed to parse '"+shortForm+"' --- no such permission");
+        String shortId = shortForm.substring(0, idx);
+        Permission p = Permission.fromId(shortId);
+        if (p == null) {
+            p = fromShortId(shortId);
+            if (p == null) {
+                throw new IllegalArgumentException("Failed to parse '" + shortForm + "' --- no such permission");
+            }
+        }
         add(p, shortForm.substring(idx + 1));
+    }
+
+    /**
+     * Determines the given permission based on its 'short ID', which is any suffix of the permission ID after a period.
+     * For example, 'hudson.model.Hudson.Administer' can have the following valid short IDs: Administer, Hudson.Administer,
+     * model.Hudson.Administer, and hudson.model.Hudson.Administer.
+     *
+     * To prevent ambiguity, this method only returns a matching permission if only one is found, otherwise a message is
+     * logged and null returned.
+     *
+     * @param shortId a suffix of the permission to find
+     * @return the Permission matching the shortId, or null if not exactly one match was found.
+     */
+    @Restricted(NoExternalUse.class)
+    default Permission fromShortId(String shortId) {
+        List<Permission> candidates = new ArrayList<>();
+        String suffix = "." + shortId;
+
+        for (Permission p : Permission.getAll()) {
+            String id = p.getId();
+            if (id.endsWith(suffix)) {
+                candidates.add(p);
+            }
+        }
+
+        String candidatesString = StringUtils.join(candidates, ", ");
+
+        if (candidates.size() != 1) {
+            Logger.getLogger(AuthorizationContainer.class.getName()).log(
+                    Level.WARNING, "Ambiguous short permission ID %s: Found %d candidates: %s",
+                    new Object[]{ shortId, candidates.size(), candidatesString });
+            return null;
+        }
+
+        return candidates.get(0);
     }
 
     /**

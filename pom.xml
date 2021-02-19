@@ -57,32 +57,38 @@
 
         <!-- test dependencies -->
         <dependency>
+            <!-- Not strictly necessary, but allows testing import/export of Credentials related permissions -->
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- CpsFlowDefinition used to test self redefining pipeline with `properties` step -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Provides SnippetizerTester -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- JobPropertyStep needed for Snippetizer test -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-multibranch</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- For JenkinsConfiguredWithCodeRule in JCasC tests -->
             <groupId>io.jenkins.configuration-as-code</groupId>
             <artifactId>test-harness</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- For use in JCasC tests -->
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>job-dsl</artifactId>
             <version>1.76</version>

@@ -104,12 +104,12 @@ public class Security2180Test {
             final HtmlPage htmlPage = webClient.goTo("");
             final String contentAsString = htmlPage.getWebResponse().getContentAsString();
             if (visibleWithFix) {
-                assertTrue(job.hasPermission(Jenkins.ANONYMOUS, Item.READ));
-                assertTrue(job.hasPermission(ACL.SYSTEM, Item.READ));
+                assertTrue(job.hasPermission2(Jenkins.ANONYMOUS2, Item.READ));
+                assertTrue(job.hasPermission2(ACL.SYSTEM2, Item.READ));
                 assertThat(contentAsString, containsString(jobUrl));
             } else {
-                assertFalse(job.hasPermission(Jenkins.ANONYMOUS, Item.READ));
-                assertTrue(job.hasPermission(ACL.SYSTEM, Item.READ));
+                assertFalse(job.hasPermission2(Jenkins.ANONYMOUS2, Item.READ));
+                assertTrue(job.hasPermission2(ACL.SYSTEM2, Item.READ));
                 assertThat(contentAsString, not(containsString(jobUrl)));
             }
         }
@@ -122,12 +122,12 @@ public class Security2180Test {
                 final HtmlPage htmlPage = webClient.goTo("");
                 final String contentAsString = htmlPage.getWebResponse().getContentAsString();
                 if (visibleWithEscapeHatch) {
-                    assertTrue(job.hasPermission(Jenkins.ANONYMOUS, Item.READ));
-                    assertTrue(job.hasPermission(ACL.SYSTEM, Item.READ));
+                    assertTrue(job.hasPermission2(Jenkins.ANONYMOUS2, Item.READ));
+                    assertTrue(job.hasPermission2(ACL.SYSTEM2, Item.READ));
                     assertThat(contentAsString, containsString(jobUrl));
                 } else {
-                    assertFalse(job.hasPermission(Jenkins.ANONYMOUS, Item.READ));
-                    assertTrue(job.hasPermission(ACL.SYSTEM, Item.READ));
+                    assertFalse(job.hasPermission2(Jenkins.ANONYMOUS2, Item.READ));
+                    assertTrue(job.hasPermission2(ACL.SYSTEM2, Item.READ));
                     assertThat(contentAsString, not(containsString(jobUrl)));
                 }
             }
@@ -155,8 +155,8 @@ public class Security2180Test {
         return job;
     }
 
-    private com.cloudbees.hudson.plugins.folder.properties.AuthorizationMatrixProperty createFolderProperty(Map<Permission, Set<String>> permissionSetMap) {
-        return createFolderProperty(permissionSetMap, new InheritParentStrategy());
+    private com.cloudbees.hudson.plugins.folder.properties.AuthorizationMatrixProperty createFolderPropertyForAnonymousItemRead() {
+        return createFolderProperty(Security2180Test.ANONYMOUS_CAN_ITEM_READ, new InheritParentStrategy());
     }
 
     private com.cloudbees.hudson.plugins.folder.properties.AuthorizationMatrixProperty createFolderProperty(Map<Permission, Set<String>> permissionSetMap, InheritanceStrategy inheritanceStrategy) {
@@ -167,8 +167,8 @@ public class Security2180Test {
         return property;
     }
 
-    private AuthorizationMatrixProperty createJobProperty(Map<Permission, Set<String>> permissionSetMap) {
-        return createJobProperty(permissionSetMap, new InheritParentStrategy());
+    private AuthorizationMatrixProperty createJobPropertyForAnonymousItemRead() {
+        return createJobProperty(Security2180Test.ANONYMOUS_CAN_ITEM_READ, new InheritParentStrategy());
     }
 
     private AuthorizationMatrixProperty createJobProperty(Map<Permission, Set<String>> permissionSetMap, InheritanceStrategy inheritanceStrategy) {
@@ -241,7 +241,7 @@ public class Security2180Test {
         prepareJenkinsDefaultSetupWithOverallReadForAnonymous();
         FreeStyleProject job = prepareNestedProject(
                 null,
-                createJobProperty(ANONYMOUS_CAN_ITEM_READ)
+                createJobPropertyForAnonymousItemRead()
         );
 
         job.scheduleBuild2(0, new Cause.UserIdCause("admin")).waitForStart(); // schedule one build now
@@ -292,8 +292,8 @@ public class Security2180Test {
         FreeStyleProject job = prepareNestedProject(
                 null,
                 createFolderProperty(Collections.emptyMap(), new NonInheritingStrategy()),
-                createFolderProperty(ANONYMOUS_CAN_ITEM_READ),
-                createJobProperty(ANONYMOUS_CAN_ITEM_READ)
+                createFolderPropertyForAnonymousItemRead(),
+                createJobPropertyForAnonymousItemRead()
         );
         assertJobVisibility(job, false, true);
     }
@@ -305,8 +305,8 @@ public class Security2180Test {
         FreeStyleProject job = prepareNestedProject(
                 null,
                 createFolderProperty(Collections.emptyMap(), new InheritGlobalStrategy()),
-                createFolderProperty(ANONYMOUS_CAN_ITEM_READ),
-                createJobProperty(ANONYMOUS_CAN_ITEM_READ));
+                createFolderPropertyForAnonymousItemRead(),
+                createJobPropertyForAnonymousItemRead());
         assertJobVisibility(job, true, true);
     }
 
@@ -317,8 +317,8 @@ public class Security2180Test {
         FreeStyleProject job = prepareNestedProject(
                 createFolderProperty(Collections.emptyMap(), new NonInheritingStrategy()),
                 createFolderProperty(Collections.emptyMap(), new InheritGlobalStrategy()),
-                createFolderProperty(ANONYMOUS_CAN_ITEM_READ),
-                createJobProperty(ANONYMOUS_CAN_ITEM_READ)
+                createFolderPropertyForAnonymousItemRead(),
+                createJobPropertyForAnonymousItemRead()
         );
         assertJobVisibility(job, false, true);
     }

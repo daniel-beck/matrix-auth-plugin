@@ -14,6 +14,7 @@ import org.jvnet.hudson.test.recipes.LocalData;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -47,7 +48,7 @@ public class ExportTest {
 
         { // node configuration
             Configurator<AuthorizationMatrixNodeProperty> c = context.lookupOrFail(AuthorizationMatrixNodeProperty.class);
-            AuthorizationMatrixNodeProperty nodeProperty = j.jenkins.getNode("agent1").getNodeProperty(AuthorizationMatrixNodeProperty.class);
+            AuthorizationMatrixNodeProperty nodeProperty = Objects.requireNonNull(j.jenkins.getNode("agent1")).getNodeProperty(AuthorizationMatrixNodeProperty.class);
 
             CNode node = c.describe(nodeProperty, context);
             assertNotNull(node);

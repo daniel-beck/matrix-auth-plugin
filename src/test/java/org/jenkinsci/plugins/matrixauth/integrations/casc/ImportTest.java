@@ -39,7 +39,7 @@ public class ImportTest {
     public LoggerRule l = new LoggerRule().record(MatrixAuthorizationStrategyConfigurator.class, Level.WARNING).capture(20);
 
     @Test
-    @ConfiguredWithCode("configuration-as-code-ambiguous.yml")
+    @ConfiguredWithCode("configuration-as-code-v2-ambiguous.yml")
     public void should_support_configuration_as_code_ambiguous_format() {
         assertTrue("security realm", r.jenkins.getSecurityRealm() instanceof HudsonPrivateSecurityRealm);
         AuthorizationStrategy authorizationStrategy = r.jenkins.getAuthorizationStrategy();
@@ -91,7 +91,7 @@ public class ImportTest {
     }
 
     @Test
-    @ConfiguredWithCode("configuration-as-code.yml")
+    @ConfiguredWithCode("configuration-as-code-v2.yml")
     public void should_support_configuration_as_code() {
         assertTrue("security realm", r.jenkins.getSecurityRealm() instanceof HudsonPrivateSecurityRealm);
         AuthorizationStrategy authorizationStrategy = r.jenkins.getAuthorizationStrategy();
@@ -132,7 +132,7 @@ public class ImportTest {
     }
 
     @Test
-    @ConfiguredWithCode("legacy-format.yml")
+    @ConfiguredWithCode("configuration-as-code-v1.yml")
     public void legacyTest() {
         assertTrue("security realm", r.jenkins.getSecurityRealm() instanceof HudsonPrivateSecurityRealm);
         AuthorizationStrategy authorizationStrategy = r.jenkins.getAuthorizationStrategy();

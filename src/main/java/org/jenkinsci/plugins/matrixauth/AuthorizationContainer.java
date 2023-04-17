@@ -203,20 +203,26 @@ public interface AuthorizationContainer {
             sid = shortForm.substring(firstEndIndex + 1);
             LOGGER.log(Jenkins.get().getInitLevel().ordinal() < InitMilestone.COMPLETED.ordinal() ? Level.WARNING : Level.FINE, "Processing a permission assignment in the legacy format (without explicit TYPE prefix): " + shortForm);
         }
-        Permission p = Permission.fromId(permissionString);
-        if (p == null) {
-            // attempt to find the permission based on the 'nice' name, e.g. Overall/Administer
-            p = PermissionFinder.findPermission(permissionString);
-        }
-        if (p == null) {
-            throw new IllegalArgumentException("Failed to parse '" + shortForm + "' --- no such permission");
-        }
+        Permission p = parsePermission(permissionString);
         if (!p.isContainedBy(((AuthorizationContainerDescriptor) getDescriptor()).getPermissionScope())) {
             LOGGER.log(Level.WARNING,
                     "Tried to add inapplicable permission " + p + " for " + sid + " in " + this + ", skipping");
             return;
         }
         add(p, new PermissionEntry(type, sid));
+    }
+
+    @Restricted(NoExternalUse.class)
+    static Permission parsePermission(String permission) {
+        Permission p = Permission.fromId(permission);
+        if (p == null) {
+            // attempt to find the permission based on the 'nice' name, e.g. Overall/Administer
+            p = PermissionFinder.findPermission(permission);
+        }
+        if (p == null) {
+            throw new IllegalArgumentException("Failed to parse '" + permission + "' --- no such permission");
+        }
+        return p;
     }
 
     @Restricted(NoExternalUse.class)

@@ -39,11 +39,14 @@ public abstract class MatrixAuthorizationStrategyConfigurator<T extends Authoriz
     @NonNull
     public Set<Attribute<T, ?>> describe() {
         return new HashSet<>(Arrays.asList(
+                new MultivaluedAttribute<T, DefinitionEntry>("entries", DefinitionEntry.class)
+                        .getter(MatrixAuthorizationStrategyConfigurator::getEntries)
+                        .setter(MatrixAuthorizationStrategyConfigurator::setEntries),
+
+                // support old style configuration options
                 new MultivaluedAttribute<T, String>("permissions", String.class)
                         .getter(unused -> null)
                         .setter(MatrixAuthorizationStrategyConfigurator::setLegacyPermissions),
-
-                // support old style configuration options
                 new MultivaluedAttribute<T, String>("grantedPermissions", String.class)
                         .getter(unused -> null)
                         .setter(MatrixAuthorizationStrategyConfigurator::setPermissionsDeprecated)

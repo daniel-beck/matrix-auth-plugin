@@ -39,7 +39,7 @@ public class DefinitionEntry {
     }
 
     public String getObject() {
-        return permissionEntry.getType() == AuthorizationType.EITHER ? permissionEntry.getSid() : null;
+        return permissionEntry == null ? null : permissionEntry.getType() == AuthorizationType.EITHER ? permissionEntry.getSid() : null;
     }
 
     @DataBoundSetter
@@ -49,7 +49,7 @@ public class DefinitionEntry {
     }
 
     public String getUser() {
-        return permissionEntry.getType() == AuthorizationType.USER ? permissionEntry.getSid() : null;
+        return permissionEntry == null ? null : permissionEntry.getType() == AuthorizationType.USER ? permissionEntry.getSid() : null;
     }
 
     @DataBoundSetter
@@ -59,7 +59,7 @@ public class DefinitionEntry {
     }
 
     public String getGroup() {
-        return permissionEntry.getType() == AuthorizationType.GROUP ? permissionEntry.getSid() : null;
+        return permissionEntry == null ? null : permissionEntry.getType() == AuthorizationType.GROUP ? permissionEntry.getSid() : null;
     }
 
     private void requireNoPermissionType() {

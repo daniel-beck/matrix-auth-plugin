@@ -7,12 +7,19 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import hudson.security.Permission;
 import org.jenkinsci.plugins.matrixauth.AuthorizationContainer;
+import org.jenkinsci.plugins.matrixauth.integrations.PermissionFinder;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Wrapper for {@link hudson.security.Permission} referenced in JCasC
  */
 public class PermissionDefinition {
     private Permission permission;
+
+    @DataBoundConstructor
+    public PermissionDefinition(String permission) {
+        this.permission = PermissionFinder.findPermission(permission);
+    }
 
     private PermissionDefinition(Permission permission) {
         this.permission = permission;

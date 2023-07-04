@@ -39,7 +39,9 @@ public class DefinitionEntry {
     }
 
     public String getObject() {
-        return permissionEntry == null ? null : permissionEntry.getType() == AuthorizationType.EITHER ? permissionEntry.getSid() : null;
+        return permissionEntry == null
+                ? null
+                : permissionEntry.getType() == AuthorizationType.EITHER ? permissionEntry.getSid() : null;
     }
 
     @DataBoundSetter
@@ -49,7 +51,9 @@ public class DefinitionEntry {
     }
 
     public String getUser() {
-        return permissionEntry == null ? null : permissionEntry.getType() == AuthorizationType.USER ? permissionEntry.getSid() : null;
+        return permissionEntry == null
+                ? null
+                : permissionEntry.getType() == AuthorizationType.USER ? permissionEntry.getSid() : null;
     }
 
     @DataBoundSetter
@@ -59,12 +63,16 @@ public class DefinitionEntry {
     }
 
     public String getGroup() {
-        return permissionEntry == null ? null : permissionEntry.getType() == AuthorizationType.GROUP ? permissionEntry.getSid() : null;
+        return permissionEntry == null
+                ? null
+                : permissionEntry.getType() == AuthorizationType.GROUP ? permissionEntry.getSid() : null;
     }
 
     private void requireNoPermissionType() {
         if (permissionEntry != null) {
-            throw new IllegalStateException("Can only configure one of: 'user', 'group', 'object', but redefine after '" + authorizationTypeToKey(permissionEntry.getType()) + "' was already set to '" + permissionEntry.getSid() + "'");
+            throw new IllegalStateException("Can only configure one of: 'user', 'group', 'object', but redefine after '"
+                    + authorizationTypeToKey(permissionEntry.getType()) + "' was already set to '"
+                    + permissionEntry.getSid() + "'");
         }
     }
 

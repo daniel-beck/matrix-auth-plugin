@@ -29,12 +29,6 @@ import hudson.security.AuthorizationStrategy;
 import hudson.security.GlobalMatrixAuthorizationStrategy;
 import hudson.security.Permission;
 import hudson.security.SecurityRealm;
-import jenkins.model.IdStrategy;
-import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.matrixauth.integrations.PermissionFinder;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -47,6 +41,11 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import jenkins.model.IdStrategy;
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.matrixauth.integrations.PermissionFinder;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 @Restricted(NoExternalUse.class)
 public interface AuthorizationContainer {
@@ -118,13 +117,14 @@ public interface AuthorizationContainer {
             throw new IllegalArgumentException("Permission cannot be null for: " + entry);
         }
 
-        LOGGER.log(Level.FINE, "Grant permission \"{0}\" to \"{1}\")", new Object[] { permission, entry });
-        getGrantedPermissionEntries().computeIfAbsent(permission, k -> new HashSet<>()).add(entry);
+        LOGGER.log(Level.FINE, "Grant permission \"{0}\" to \"{1}\")", new Object[] {permission, entry});
+        getGrantedPermissionEntries()
+                .computeIfAbsent(permission, k -> new HashSet<>())
+                .add(entry);
         if (entry.getType() != AuthorizationType.USER) {
             recordGroup(entry.getSid());
         }
     }
-
 
     /**
      * Returns all the (Permission, sid) tuples where permissions are granted to either
@@ -139,7 +139,10 @@ public interface AuthorizationContainer {
         final Map<Permission, Set<String>> ret = new HashMap<>();
         final Map<Permission, Set<PermissionEntry>> grantedPermissionEntries = getGrantedPermissionEntries();
         for (Map.Entry<Permission, Set<PermissionEntry>> entry : grantedPermissionEntries.entrySet()) {
-            final Set<String> eitherGrants = entry.getValue().stream().filter(it -> it.getType() == AuthorizationType.EITHER).map(PermissionEntry::getSid).collect(Collectors.toSet());
+            final Set<String> eitherGrants = entry.getValue().stream()
+                    .filter(it -> it.getType() == AuthorizationType.EITHER)
+                    .map(PermissionEntry::getSid)
+                    .collect(Collectors.toSet());
             if (eitherGrants.size() > 0) {
                 ret.put(entry.getKey(), eitherGrants);
             }
@@ -201,11 +204,17 @@ public interface AuthorizationContainer {
             type = AuthorizationType.EITHER;
             permissionString = first;
             sid = shortForm.substring(firstEndIndex + 1);
-            LOGGER.log(Jenkins.get().getInitLevel().ordinal() < InitMilestone.COMPLETED.ordinal() ? Level.WARNING : Level.FINE, "Processing a permission assignment in the legacy format (without explicit TYPE prefix): " + shortForm);
+            LOGGER.log(
+                    Jenkins.get().getInitLevel().ordinal() < InitMilestone.COMPLETED.ordinal()
+                            ? Level.WARNING
+                            : Level.FINE,
+                    "Processing a permission assignment in the legacy format (without explicit TYPE prefix): "
+                            + shortForm);
         }
         Permission p = parsePermission(permissionString);
         if (!p.isContainedBy(((AuthorizationContainerDescriptor) getDescriptor()).getPermissionScope())) {
-            LOGGER.log(Level.WARNING,
+            LOGGER.log(
+                    Level.WARNING,
                     "Tried to add inapplicable permission " + p + " for " + sid + " in " + this + ", skipping");
             return;
         }
@@ -241,8 +250,7 @@ public interface AuthorizationContainer {
     default List<String> getAllSIDs() {
         DeprecationUtil.logDeprecationMessage();
         Set<String> r = new TreeSet<>(new GlobalMatrixAuthorizationStrategy.IdStrategyComparator());
-        for (Set<String> set : getGrantedPermissions().values())
-            r.addAll(set);
+        for (Set<String> set : getGrantedPermissions().values()) r.addAll(set);
         r.remove("anonymous");
 
         String[] data = r.toArray(new String[0]);
@@ -281,7 +289,7 @@ public interface AuthorizationContainer {
             if (set.contains(sid)) {
                 return true;
             }
-            for (String s: set) {
+            for (String s : set) {
                 if (userIdStrategy.equals(s, sid) || groupIdStrategy.equals(s, sid)) {
                     return true;
                 }
@@ -354,17 +362,17 @@ public interface AuthorizationContainer {
             final SecurityRealm securityRealm = Jenkins.get().getSecurityRealm();
             final IdStrategy groupIdStrategy = securityRealm.getGroupIdStrategy();
             final IdStrategy userIdStrategy = securityRealm.getUserIdStrategy();
-            for (PermissionEntry s: grantedEntries) {
+            for (PermissionEntry s : grantedEntries) {
                 if (s.getType() != entry.getType()) {
                     // only match if the type provided is identical
                     continue;
                 }
-                if (userIdStrategy.equals(s.getSid(), entry.getSid()) || groupIdStrategy.equals(s.getSid(), entry.getSid())) {
+                if (userIdStrategy.equals(s.getSid(), entry.getSid())
+                        || groupIdStrategy.equals(s.getSid(), entry.getSid())) {
                     return true;
                 }
             }
         }
         return false;
     }
-
 }

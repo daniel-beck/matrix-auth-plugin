@@ -1,39 +1,36 @@
 package org.jenkinsci.plugins.matrixauth.integrations.casc;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.security.AuthorizationStrategy;
 import hudson.security.Permission;
 import io.jenkins.plugins.casc.Attribute;
 import io.jenkins.plugins.casc.BaseConfigurator;
 import io.jenkins.plugins.casc.impl.attributes.MultivaluedAttribute;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.jenkinsci.plugins.matrixauth.AuthorizationContainer;
 import org.jenkinsci.plugins.matrixauth.PermissionEntry;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 @Restricted(NoExternalUse.class)
-public abstract class MatrixAuthorizationStrategyConfigurator<T extends AuthorizationContainer> extends BaseConfigurator<T> {
+public abstract class MatrixAuthorizationStrategyConfigurator<T extends AuthorizationContainer>
+        extends BaseConfigurator<T> {
 
     @NonNull
     @Override
     public Class<?> getImplementedAPI() {
         return AuthorizationStrategy.class;
     }
-
 
     @Override
     @NonNull
@@ -49,8 +46,7 @@ public abstract class MatrixAuthorizationStrategyConfigurator<T extends Authoriz
                         .setter(MatrixAuthorizationStrategyConfigurator::setLegacyPermissions),
                 new MultivaluedAttribute<T, String>("grantedPermissions", String.class)
                         .getter(unused -> null)
-                        .setter(MatrixAuthorizationStrategyConfigurator::setPermissionsDeprecated)
-        ));
+                        .setter(MatrixAuthorizationStrategyConfigurator::setPermissionsDeprecated)));
     }
 
     private static class PermissionAssignment {
@@ -84,8 +80,16 @@ public abstract class MatrixAuthorizationStrategyConfigurator<T extends Authoriz
         final HashMap<PermissionEntry, List<PermissionDefinition>> intermediate = entries.entrySet().stream()
                 .map(entry -> Map.entry(PermissionDefinition.forPermission(entry.getKey()), entry.getValue()))
                 .flatMap(entry -> entry.getValue().stream().map(p -> new PermissionAssignment(entry.getKey(), p)))
-                .collect(HashMap::new, (c, e) -> c.computeIfAbsent(e.getEntry(), f -> new ArrayList<>()).add(e.getPermission()), (c1, c2) -> { /* unused */ });
-        final Set<DefinitionEntry> result = intermediate.entrySet().stream().map(entry -> new DefinitionEntry(entry.getKey(), entry.getValue())).collect(Collectors.toSet());
+                .collect(
+                        HashMap::new,
+                        (c, e) -> c.computeIfAbsent(e.getEntry(), f -> new ArrayList<>())
+                                .add(e.getPermission()),
+                        (c1, c2) -> {
+                            /* unused */
+                        });
+        final Set<DefinitionEntry> result = intermediate.entrySet().stream()
+                .map(entry -> new DefinitionEntry(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toSet());
         return result;
     }
 
@@ -102,8 +106,9 @@ public abstract class MatrixAuthorizationStrategyConfigurator<T extends Authoriz
      */
     public static Collection<String> getLegacyPermissions(AuthorizationContainer container) {
         return container.getGrantedPermissionEntries().entrySet().stream()
-                .flatMap( e -> e.getValue().stream()
-                        .map(v -> v.getType().toPrefix() + e.getKey().group.getId() + "/" + e.getKey().name + ":" + v.getSid()))
+                .flatMap(e -> e.getValue().stream()
+                        .map(v -> v.getType().toPrefix() + e.getKey().group.getId() + "/" + e.getKey().name + ":"
+                                + v.getSid()))
                 .sorted()
                 .collect(Collectors.toList());
     }
@@ -112,7 +117,10 @@ public abstract class MatrixAuthorizationStrategyConfigurator<T extends Authoriz
      * Configure container's permissions from a List of "PERMISSION:sid" or "TYPE:PERMISSION:sid"
      */
     public static void setLegacyPermissions(AuthorizationContainer container, Collection<String> permissions) {
-        LOGGER.log(Level.WARNING, "Loading deprecated attribute 'permissions' for instance of '" + container.getClass().getName() +"'. Use 'entries' instead.");
+        LOGGER.log(
+                Level.WARNING,
+                "Loading deprecated attribute 'permissions' for instance of '"
+                        + container.getClass().getName() + "'. Use 'entries' instead.");
         permissions.forEach(container::add);
     }
 
@@ -120,7 +128,10 @@ public abstract class MatrixAuthorizationStrategyConfigurator<T extends Authoriz
      * Like {@link #setLegacyPermissions(AuthorizationContainer, Collection)} but logs a deprecation warning
      */
     public static void setPermissionsDeprecated(AuthorizationContainer container, Collection<String> permissions) {
-        LOGGER.log(Level.WARNING, "Loading deprecated attribute 'grantedPermissions' for instance of '" + container.getClass().getName() +"'. Use 'permissions' instead.");
+        LOGGER.log(
+                Level.WARNING,
+                "Loading deprecated attribute 'grantedPermissions' for instance of '"
+                        + container.getClass().getName() + "'. Use 'permissions' instead.");
         setLegacyPermissions(container, permissions);
     }
 

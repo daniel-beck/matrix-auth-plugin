@@ -31,14 +31,13 @@ public class DefinitionEntry {
         return permissionEntry;
     }
 
-    // TODO What to name this? object, either, any?
     @DataBoundSetter
-    public void setObject(String object) {
+    public void setUserOrGroup(String userOrGroup) {
         requireNoPermissionType();
-        this.permissionEntry = new PermissionEntry(AuthorizationType.EITHER, object);
+        this.permissionEntry = new PermissionEntry(AuthorizationType.EITHER, userOrGroup);
     }
 
-    public String getObject() {
+    public String getUserOrGroup() {
         return permissionEntry == null
                 ? null
                 : permissionEntry.getType() == AuthorizationType.EITHER ? permissionEntry.getSid() : null;
@@ -70,9 +69,10 @@ public class DefinitionEntry {
 
     private void requireNoPermissionType() {
         if (permissionEntry != null) {
-            throw new IllegalStateException("Can only configure one of: 'user', 'group', 'object', but redefine after '"
-                    + authorizationTypeToKey(permissionEntry.getType()) + "' was already set to '"
-                    + permissionEntry.getSid() + "'");
+            throw new IllegalStateException(
+                    "Can only configure one of: 'user', 'group', 'userOrGroup', but redefine after '"
+                            + authorizationTypeToKey(permissionEntry.getType()) + "' was already set to '"
+                            + permissionEntry.getSid() + "'");
         }
     }
 
@@ -87,7 +87,7 @@ public class DefinitionEntry {
             return "group";
         }
         if (type == AuthorizationType.EITHER) {
-            return "object";
+            return "userOrGroup";
         }
         throw new IllegalStateException("Unexpected 'type': " + type);
     }

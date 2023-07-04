@@ -35,7 +35,10 @@ jenkins:
             - View/Read
         - user: anonymous
           permissions:
-          - Overall/Read
+            - Overall/Read
+        - userOrGroup: developer
+          permissions:
+            - Overall/Read
   nodes:
   - permanent:
       launcher:
@@ -56,6 +59,9 @@ jenkins:
             - user: anonymous
               permissions:
                 - Agent/Build
+            - userOrGroup: developer
+              permissions:
+                - Agent/Configure
       numExecutors: 1
       retentionStrategy: "always"
   securityRealm:

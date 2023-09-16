@@ -19,12 +19,14 @@ import org.htmlunit.html.HtmlElement;
 import org.htmlunit.html.HtmlForm;
 import org.htmlunit.html.HtmlOption;
 import org.htmlunit.html.HtmlSelect;
+import org.jenkinsci.plugins.matrixauth.ContentSecurityPolicyRule;
 import org.jenkinsci.plugins.matrixauth.PermissionEntry;
 import org.jenkinsci.plugins.matrixauth.inheritance.InheritParentStrategy;
 import org.jenkinsci.plugins.matrixauth.inheritance.NonInheritingStrategy;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
@@ -34,6 +36,9 @@ public class ProjectMatrixAuthorizationStrategyTest {
 
     @Rule
     public JenkinsRule r = new JenkinsRule();
+
+    @Rule
+    public ContentSecurityPolicyRule csp = ContentSecurityPolicyRule.create();
 
     @Test
     public void ensureCreatorHasPermissions() throws Exception {
